@@ -14,10 +14,8 @@ function searchCalibreLibrary() {
     document.getElementById("searchResponse").innerHTML = submitCatalogueSearch();
 
     var searchPagesCount = getPagesCount();
-//    window.alert("num: " + Number(searchPagesCount));
     
-    if (Number(searchPagesCount) > 15) {
-//        window.alert("Too many pages");
+    if (Number(searchPagesCount) > 20) {
      document.getElementById("searchResponse").style.visibility = "visible";
      document.getElementById("searchResponse").innerHTML = "There are " + searchPagesCount + " pages of results to show. Please narrow your search";       
     } else {
@@ -38,8 +36,6 @@ function searchCalibreLibrary() {
             var authorCatalogueElement = book.getElementsByClassName("parametres-holder")[0];
 
             var author = authorCatalogueElement.getElementsByClassName("parametres-list")[0].getElementsByTagName("li")[0].getElementsByTagName("a")[0].innerHTML;
- //           window.alert(bookName + "|" + author.trimLeft());
-                     
             var catalogueNumber = authorCatalogueElement.getElementsByClassName("parametres-list")[0].getElementsByTagName("li")[1].getElementsByTagName("span")[1].innerHTML;
             
             // Update books list
@@ -60,8 +56,7 @@ function searchCalibreLibrary() {
 function submitCatalogueSearch() {
     var xmlHttp = new XMLHttpRequest();
     var searchWords = document.getElementById("searchWords").value; 
-    var searchUrl = encodeURI("https://www.calibre.org.uk/library.aspx?search=" + searchWords + "&field=0&filter=0#maincontent");
-//    window.alert(encodeURI(searchUrl));   
+    var searchUrl = encodeURI("https://www.calibre.org.uk/library.aspx?search=" + searchWords + "&field=0&filter=0#maincontent"); 
     xmlHttp.open( "GET", searchUrl, false ); // false for synchronous request
     xmlHttp.send( null );
     return xmlHttp.responseText;
