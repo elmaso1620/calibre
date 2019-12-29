@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mary's Calibre Library Search Page</title>
+<!-- https://www.calibre.org.uk/library.aspx?search=pullman&field=0&filter=0#maincontent -->
+    <script>
+function searchCalibreLibrary() {
+    var currentDatetime = new Date();
+    var searchWords = document.getElementById("searchWords").value;
+    var books = [];
+        
+    // Submit & fetch Search Results
+    document.getElementById("searchResponse").style.visibility = "hidden";
+    document.getElementById("searchResponse").innerHTML = submitCatalogueSearch();
+
+    var searchPagesCount = getPagesCount();
+//    window.alert("num: " + Number(searchPagesCount));
+    
+    if (Number(searchPagesCount) > 15) {
+//        window.alert("Too many pages");
+     document.getElementById("searchResponse").style.visibility = "visible";
+     document.getElementById("searchResponse").innerHTML = "There are " + searchPagesCount + " pages of results to show. Please narrow your search";       
+    } else {
+        var i;
+      for (i = 1; i <= Number(searchPagesCount); i++) { 
+         document.getElementById("searchResponse").style.visibility = "visible";
+         document.getElementById("searchResponse").innerHTML = getSearchResultsByPage(i);
+
+         // Parse results 
+         var pageBooks = document.getElementsByClassName("parametres-block");
+
+         for (j = 0; j < pageBooks.length; j++) {
+            var book = pageBooks[j];
+            var bookNameElement = book.getElementsByClassName("parametres-box")[0];
+            var bookName = bookNameElement.getElementsByTagName("h2")[0].getElementsByTagName("a")[0].innerHTML;            
+             
+            
+            var authorCatalogueElement = book.getElementsByClassName("parametres-holder")[0];
+
+            var author = authorCatalogueElement.getElementsByClassName("parametres-list")[0].getElementsByTagName("li")[0].getElementsByTagName("a")[0].innerHTML;
+ //           window.alert(bookName + "|" + author.trimLeft());
+                     
+            var catalogueNumber = authorCatalogueElement.getElementsByClassName("parametres-list")[0].getElementsByTagName("li")[1].getElementsByTagName("span")[1].innerHTML;
+            
+            // Update books list
+            books.push(bookName + "|" + author.trimLeft() + "|" + catalogueNumber); 
+         } // End books loop
+      } // End page loop  
+    }
+    
+    // Update results
+    if (searchWords != "" && books != "") {        
+        renderSearchResults(searchWords, books);
+    } else {
+       document.getElementById("searchResults").innerHTML = "No Search Results.";
+    }
+}
+  
+        
+function submitCatalogueSearch() {
+    var xmlHttp = new XMLHttpRequest();
+    var searchWords = document.getElementById("searchWords").value; 
+    var searchUrl = encodeURI("https://www.calibre.org.uk/library.aspx?search=" + searchWords + "&field=0&filter=0#maincontent");
+//    window.alert(encodeURI(searchUrl));   
+    xmlHttp.open( "GET", searchUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+}
+        
+function getPagesCount() {
+    var pagesString = document.getElementById("ctl00_main_pageCount").innerHTML;   
+    var pagesCountString = pagesString.split("\n", 4);
+    var pagesCount = pagesCountString[3].split("&nbsp;")[0].trimLeft();
+    return pagesCount;
+}
+   
+function getSearchResultsByPage(pageNumber) {    
+    var xmlHttp = new XMLHttpRequest();
+    var searchWords = document.getElementById("searchWords").value; 
+    var searchUrl = encodeURI("https://www.calibre.org.uk/library.aspx?search=" + searchWords + "&field=0&filter=0&page=" + pageNumber);
+    xmlHttp.open( "GET", searchUrl, false ); // false for synchronous request
+    xmlHttp.send( null );    
+    document.getElementById("searchResponse").style.visibility = "hidden";
+    return xmlHttp.responseText;  
+}
+        
+function renderSearchResults(searchWords, books) { 
+    var bookTable = "<table>"    
+    for (i = 0; i < books.length; i++) {
+       var bookData = books[i].split("|", 3);
+       bookTable += "<tr><td>Title " + bookData[0] + "</td><td>By " + bookData[1] + "</td><td>Catalogue Number " + bookData[2] + "</td></tr>";
+    }
+    bookTable += "</table>";
+        
+    // Set data table to field    
+    document.getElementById("searchResults").innerHTML = "Search Results for " + searchWords + "<br><br>" + bookTable;
+}
+        
+</script>
+</head>
+<body>
+    Search words: <input type="text" id="searchWords"> <button type="button" onclick='searchCalibreLibrary()'>Search</button>
+<hr>
+<p id="searchResults">No Search Results.</p>    
+    
+    
+<p id="searchResponse">s</p>       
+    
+</body>
+</html>
